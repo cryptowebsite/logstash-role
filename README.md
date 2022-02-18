@@ -3,7 +3,6 @@ Kibana role
 
 Роль для установки logstash на хостах с ОС: Debian, Ubuntu, CentOS, RHEL.
 
-А также для обновления и настройки стека ELK
 
 Requirements
 ------------

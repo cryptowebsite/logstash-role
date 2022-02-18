@@ -13,38 +13,3 @@
     state: restarted
   when: ansible_virtualization_type != 'docker'
 
-
-
-- name: restart Kibana Debian
-  delegate_to: "{{ hostvars['kbn-debian']['ansible_host'] }}"
-  become: true
-  service:
-    name: kibana
-    state: restarted
-  when: ansible_virtualization_type != 'docker'
-
-- name: restart Kibana Centos
-  delegate_to: "{{ hostvars['kbn-centos']['ansible_host'] }}"
-  become: true
-  service:
-    name: kibana
-    state: restarted
-  when: ansible_virtualization_type != 'docker'
-
-
-
-- name: restart Filebeat Debian
-  delegate_to: "{{ hostvars['fb-debian']['ansible_host'] }}"
-  become: true
-  service:
-    name: filebeat
-    state: restarted
-  when: ansible_virtualization_type != 'docker'
-
-- name: restart Filebeat Centos
-  delegate_to: "{{ hostvars['fb-centos']['ansible_host'] }}"
-  become: true
-  service:
-    name: filebeat
-    state: restarted
-  when: ansible_virtualization_type != 'docker'
