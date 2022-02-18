@@ -1,0 +1,47 @@
+---
+- name: "Download Kibana's deb"
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{ filebeat_new_version }}-amd64.deb"
+    dest: "files/filebeat-{{ filebeat_new_version }}-amd64.deb"
+    validate_certs: false
+  delegate_to: localhost
+  register: download_filebeat
+  until: download_filebeat is succeeded
+  when: filebeat_install_type == 'remote'
+- name: Copy Filebeat to manage host
+  delegate_to: "{{ hostvars['fb-debian']['ansible_host'] }}"
+  copy:
+    src: "files/filebeat-{{ filebeat_new_version }}-amd64.deb"
+    mode: 0755
+    dest: "/tmp/filebeat-{{ filebeat_new_version }}-amd64.deb"
+- name: Install Filebeat
+  delegate_to: "{{ hostvars['fb-debian']['ansible_host'] }}"
+  become: true
+  apt:
+    deb: "/tmp/filebeat-{{ filebeat_new_version }}-amd64.deb"
+    state: present
+- name: Configure Filebeat
+  delegate_to: "{{ hostvars['fb-centos']['ansible_host'] }}"
+  become: true
+  template:
+    src: filebeat.yml.j2
+    mode: 0644
+    dest: /etc/filebeat/filebeat.yml
+  notify: restart Filebeat Debian
+- name: Set filebeat systemwork
+  delegate_to: "{{ hostvars['fb-debian']['ansible_host'] }}"
+  become: true
+  command:
+    cmd: filebeat modules enable system
+    chdir: /usr/share/filebeat/bin
+  register: filebeat_modules
+  changed_when: filebeat_modules.stdout != 'Module system is already enabled'
+- name: Load kibana dashboard
+  delegate_to: "{{ hostvars['fb-debian']['ansible_host'] }}"
+  become: true
+  command:
+    cmd: filebeat setup
+    chdir: /usr/share/filebeat/bin
+  register: filebeat_setup
+  until: filebeat_setup is succeeded
+

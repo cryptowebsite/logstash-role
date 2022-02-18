@@ -1,0 +1,42 @@
+---
+- name: "Download Logstash's deb"
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/logstash/logstash-{{ logstash_new_version }}-amd64.deb"
+    dest: "files/logstash-{{ logstash_new_version }}-amd64.deb"
+    validate_certs: false
+  delegate_to: localhost
+  register: download_logstash
+  until: download_logstash is succeeded
+  when: logstash_install_type == 'remote'
+- name: Copy Logstash to manage host
+  copy:
+    src: "files/logstash-{{ logstash_new_version }}-amd64.deb"
+    mode: 0755
+    dest: "/tmp/logstash-{{ logstash_new_version }}-amd64.deb"
+- name: Install Logstash
+  become: true
+  apt:
+    deb: "/tmp/logstash-{{ logstash_new_version }}-amd64.deb"
+    state: present
+- name: Configure Logstash
+  become: true
+  template:
+    src: logstash.yml.j2
+    mode: 0644
+    dest: /etc/logstash/logstash.yml
+- name: Configure run script file
+  become: true
+  template:
+    src: logstash.sh.j2
+    mode: "0744"
+    owner: root
+    dest: /etc/logstash/logstash.sh
+
+- name: Configure init file
+  become: true
+  template:
+    src: logstash.service.j2
+    mode: "0744"
+    owner: root
+    dest: /etc/systemd/system/logstash.service
+  notify: restart Logstash

@@ -1,0 +1,15 @@
+[Unit]
+  Description=logstash
+  Requires=elasticsearch.service
+  After=elasticsearch.service
+  BindsTo=elasticsearch.service
+
+[Service]
+  ExecStart=/etc/logstash/logstash.sh
+  ExecReload=/etc/logstash/logstash.sh
+  KillMode=process
+  Restart=always
+  RestartSec=5
+
+[Install]
+  WantedBy=multi-user.target

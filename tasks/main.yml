@@ -1,0 +1,28 @@
+---
+- import_tasks: precheck.yml
+- name: Check files directory exists
+  file:
+    name: files/
+    state: directory
+  run_once: true
+  delegate_to: localhost
+- include_tasks: "download_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "install_{{ ansible_facts.pkg_mgr }}.yml"
+- import_tasks: configure.yml
+- import_tasks: enable.yml
+# Uninstall, configure and install of the new versions of the stack
+
+- include_tasks: "uninstall/uninstall_elastic_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "uninstall/uninstall_logstash_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "uninstall/uninstall_kibana_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "uninstall/uninstall_filebeat_{{ ansible_facts.pkg_mgr }}.yml"
+- name: Set new versions to update the stack
+  set_fact:
+    logstash_new_version: "7.15.0"
+    kibana_new_version: "7.15.0"
+    filebeat_new_version: "7.15.0"
+    elasticsearch_new_version: "7.15.0"
+- include_tasks: "update/update_elastic_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "update/update_logstash_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "update/update_kibana_{{ ansible_facts.pkg_mgr }}.yml"
+- include_tasks: "update/update_filebeat_{{ ansible_facts.pkg_mgr }}.yml"

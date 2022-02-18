@@ -1,0 +1,16 @@
+---
+- name: Configure run script file
+  become: true
+  template:
+    src: logstash.sh.j2
+    mode: "0744"
+    owner: root
+    dest: /etc/logstash/logstash.sh
+- name: Configure init file
+  become: true
+  template:
+    src: logstash.service.j2
+    mode: "0744"
+    owner: root
+    dest: /etc/systemd/system/logstash.service
+  notify: restart Logstash
